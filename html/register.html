@@ -52,9 +52,8 @@
 
 <body>
     <header>
-      <h1>登录</h1>
+      <h1>注册</h1>
       <div class="left" tapmode onclick="api.closeWin()">返回</div>
-      <div class="right" tapmode onclick="fnOpenRegisterWin()">注册</div>
     </header>
 </body>
 <script type="text/javascript" src="../script/api.js"></script>
@@ -64,8 +63,8 @@
     };
     function fnOpenRegisterWin(){
       api.openWin({//打开新的页面
-        name: 'register',
-        url: './register.html',
+        name: 'login',
+        url: './login.html',
         pageParam: {
           name: 'test'
         }
