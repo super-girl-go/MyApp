@@ -53,6 +53,7 @@
 <body>
     <header>
       <h1>每日优鲜</h1>
+      <div class="left" tapmode onclick="fnOpenCitySelectFrame()">选择城市</div>
       <div class="right" tapmode onclick="fnOpenPersonCenterWin()">个人中心</div>
     </header>
 </body>
@@ -69,6 +70,26 @@
           name: 'test'
         }
       })
+    }
+    function fnOpenCitySelectFrame(){
+      api.openFrame({
+          name: 'cityselct_frame',
+          url: './cityselct_frame.html',
+          rect: {
+              x: 0,
+              y: 50,
+              w: 'auto',
+              h: 'auto'
+          },
+          pageParam: {
+              name: 'test'
+          },
+          bounces: true,
+          bgColor: 'rgba(0,0,0,0)',
+          vScrollBarEnabled: true,
+          hScrollBarEnabled: true
+      });
+
     }
 </script>
 
