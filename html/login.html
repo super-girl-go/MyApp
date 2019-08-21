@@ -52,8 +52,9 @@
 
 <body>
     <header>
-      <h1>每日优鲜</h1>
-      <div class="right" tapmode onclick="fnOpenPersonCenterWin()">个人中心</div>
+      <h1>登录</h1>
+      <div class="left" tapmode onclick="api.closeWin()">返回</div>
+      <div class="right" tapmode onclick="fnOpenRegisterWin()">注册</div>
     </header>
 </body>
 <script type="text/javascript" src="../script/api.js"></script>
@@ -61,7 +62,7 @@
     apiready = function() {
 
     };
-    function fnOpenPersonCenterWin(){
+    function fnOpenRegisterWin(){
       api.openWin({//打开新的页面
         name: 'login',
         url: './login.html',
