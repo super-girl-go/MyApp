@@ -8,60 +8,204 @@
     <title>Hello APP</title>
     <link rel="stylesheet" type="text/css" href="../css/api.css" />
     <style>
-    header {
-       position: relative;
-       width: 100%;
-       height: 50px;
-       background-color: #f0f;
-   }
+      header {
+          position: relative;
+          width: 100%;
+          height: 50px;
+          background-color: #e1017e;
+      }
 
-   header h1 {
-       position: relative;
-       height: 50px;
-       line-height: 50px;
-       font-size: 20px;
-       color: #fff;
-       text-align: center;
-   }
+      header .left {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100px;
+          height: 50px;
+      }
 
-   header .left {
-       position: absolute;
-       bottom: 0;
-       left: 0;
-       width: 100px;
-       height: 50px;
-       line-height: 50px;
-       font-size: 16px;
-       color: #fff;
-       text-align: center;
-   }
+      header .left .arrow {
+          position: absolute;
+          bottom: 21px;
+          left: 11px;
+          width: 13px;
+          height: 8px;
+          background: url(../image/arrow_down.png);
+          background-size: 13px 8px;
+          background-position: center center;
+          background-repeat: no-repeat;
+          -webkit-transition: 200ms;
+          transition: 200ms;
+      }
 
-   header .right {
-       position: absolute;
-       bottom: 0;
-       right: 0;
-       width: 100px;
-       height: 50px;
-       line-height: 50px;
-       font-size: 16px;
-       color: #fff;
-       text-align: center;
-   }
-    </style>
+      header .left .arrow.active {
+          -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+      }
+
+      header .left .city {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          height: 50px;
+          padding-left: 27px;
+          box-sizing: border-box;
+          line-height: 50px;
+          font-size: 14px;
+          color: #fff;
+          text-align: left;
+      }
+
+      header .center {
+          position: relative;
+          width: 100%;
+          height: 50px;
+          background: url(../image/home_title.png);
+          background-size: 74px 19px;
+          background-position: center center;
+          background-repeat: no-repeat;
+      }
+
+      header .right {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 40px;
+          height: 50px;
+          background: url(../image/home_membercenter.png);
+          background-size: 30px 30px;
+          background-position: center center;
+          background-repeat: no-repeat;
+      }
+
+      nav {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: flex;
+          -webkit-box-orient: horizontal;
+          -webkit-flex-flow: row;
+          flex-flow: row;
+          position: relative;
+          width: 100%;
+          height: 40px;
+          background-color: #e1017e;
+      }
+
+      nav .menu {
+          -webkit-box-flex: 1;
+          -webkit-flex: 1;
+          flex: 1;
+          width: 100%;
+          height: 40px;
+          line-height: 40px;
+          font-size: 13px;
+          color: #f973b8;
+          text-align: center;
+      }
+
+      nav .menu.selected {
+          font-size: 14px;
+          color: #fff;
+          font-weight: bolder;
+      }
+      </style>
 </head>
 
 <body>
-    <header>
-      <h1>每日优鲜</h1>
-      <div class="left" tapmode onclick="fnOpenCitySelectFrame()">选择城市</div>
-      <div class="right" tapmode onclick="fnOpenPersonCenterWin()">个人中心</div>
+    <header  id="header">
+      <div class="left" tapmode onclick="fnOpenCitySelectorFrame();">
+        <div class="arrow" id="arrow"></div>
+        <div class="city" id="city">北京市</div>
+      </div>
+      <div class="center"></div>
+      <div class="rigtht" tapmode></div>
     </header>
+    <nav id="nav">
+      <div class="menu selected" tapmode="selected" onclick="fnSetNavMenuIndex(0);">水果</div>
+      <div class="menu" tapmode="selected" onclick="fnSetNavMenuIndex(1);">食材</div>
+      <div class="menu" tapmode="selected" onclick="fnSetNavMenuIndex(2);">零食</div>
+      <div class="menu" tapmode="selected" onclick="fnSetNavMenuIndex(3);">牛奶</div>
+      <div class="menu" tapmode="selected" onclick="fnSetNavMenuIndex(4);">蔬菜</div>
+    </nav>
 </body>
 <script type="text/javascript" src="../script/api.js"></script>
 <script type="text/javascript">
     apiready = function() {
 
+      initEventListenner();
+      initLocation();
+
+      const header = $api.byId('header');
+      const nav = $api.byId('nav');
+      headerH = $api.offset(header).h;
+      menus = $api.domAll(nav, '.menu');
+
+
+
+
     };
+
+    var headerH, menus,city, bMap;
+
+    function initEventListenner() {
+      alert(0)
+      api.addEventListener({
+          name: 'cityChange'
+      }, function(ret, err){
+          if( ret ){
+            alert(JSON.stringify(ret));
+               var city = $api.byId('city');
+              //  city.innerHTML = ret.value
+
+          }else{
+               alert( JSON.stringify( err ) );
+          }
+      });
+
+    }
+
+
+    function initLocation() {
+      bMap = api.require('bMap');
+      bMap.getLocation({
+          accuracy: '1000m',
+          autoStop: true,
+          filter: 1000
+      }, function(ret, err) {
+          if (ret.status) {
+              //alert(JSON.stringify(ret));
+              fnGetCityFromLocation(ret);
+          } else {
+              alert(err.code);
+          }
+      });
+    }
+
+
+    function fnGetCityFromLocation(location_) {
+    //根据经纬度查找地址信息
+      bMap.getNameFromCoords({
+          lon: location_.lon,
+          lat: location_.lat
+          }, function(ret, err) {
+              if (ret.status) {
+                  //alert(JSON.stringify(ret));
+                  fnCheckCityChange(ret.city);
+              }
+          });
+      }
+
+      function fnCheckCityChange(cityName_) {
+        if(city.innerHTML != cityName_){
+          fnOpenCitySelectorFrame();
+        }
+      }
+
+
+
+    function initLocation() {
+
+    }
+
     function fnOpenPersonCenterWin(){
       api.openWin({//打开新的页面
         name: 'login',
@@ -71,25 +215,50 @@
         }
       })
     }
-    function fnOpenCitySelectFrame(){
+    function fnOpenCitySelectorFrame(){
+      const arrow = $api.byId('arrow');
+      if(!$api.hasCls(arrow, 'active')){
+        $api.addCls(arrow, 'active');
+      }
       api.openFrame({
-          name: 'cityselct_frame',
-          url: './cityselct_frame.html',
+          name: 'cityselector_frame',
+          url: './cityselector_frame.html',
+          bgColor: 'rgba(0, 0, 0, 0.8)',
           rect: {
               x: 0,
-              y: 50,
-              w: 'auto',
-              h: 'auto'
+              y: headerH,
+              w:  'auto',
+              h:  'auto'
           },
           pageParam: {
               name: 'test'
           },
           bounces: true,
-          bgColor: 'rgba(0,0,0,0)',
-          vScrollBarEnabled: true,
-          hScrollBarEnabled: true
+      });
+    }
+
+
+    function fnSetNavMenuIndex(index_){
+      fnSetNavMenuSelected(index_)
+      api.setFrameGroupIndex({
+          name: 'mainFrameGroup',
+          index: index_,
+          scroll: true
       });
 
+    }
+
+
+
+    function fnSetNavMenuSelected(index_){
+      console.log(index_)
+      for(var i = 0; i < menus.length; i++){
+          if(index_ == i){
+            $api.addCls(menus[i], 'selected');
+          }else{
+            $api.removeCls(menus[i], 'selected');
+          }
+      }
     }
 </script>
 
