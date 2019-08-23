@@ -138,6 +138,18 @@
       const nav = $api.byId('nav');
       headerH = $api.offset(header).h;
       menus = $api.domAll(nav, '.menu');
+      navH = $api.offset(nav).h;
+
+
+      var currentCity = $api.getStorage('currentCity');
+      if(!currentCity){
+        fnOpenCitySelectorFrame();
+        return;
+      }
+
+      updateCityName(currentCity.name);
+      openFrames();
+
 
 
 
@@ -146,18 +158,26 @@
 
     var headerH, menus,city, bMap;
 
+    function updateCityName(cityName_) {
+      city = $api.byId('city');
+      city.innerHTML = cityName_
+    }
+
     function initEventListenner() {
-      alert(0)
       api.addEventListener({
           name: 'cityChange'
       }, function(ret, err){
           if( ret ){
-            alert(JSON.stringify(ret));
                var city = $api.byId('city');
-              //  city.innerHTML = ret.value
+               city.innerHTML = ret.value.currentCity.name;
+               var arrow = $api.byId('arrow');
+               if($api.hasCls(arrow, 'active')){
+                 $api.removeCls(arrow, 'active');
 
+               }
+               openFrames();
           }else{
-               alert( JSON.stringify( err ) );
+              //  alert( JSON.stringify( err ) );
           }
       });
 
@@ -172,24 +192,71 @@
           filter: 1000
       }, function(ret, err) {
           if (ret.status) {
-              //alert(JSON.stringify(ret));
+              // alert(JSON.stringify(ret));
               fnGetCityFromLocation(ret);
           } else {
-              alert(err.code);
+              // alert(err.code);
+          }
+      });
+    }
+
+    function openFrames() {
+      var frames = [];
+
+      for(var i = 0; i< menus.length; i++){
+        frames.push({
+          name: 'main_fram_' + i,
+          url: './main_frame.html',
+          pageParam: {
+            wareTypeIndex: i
+          }
+        })
+      }
+
+      api.openFrameGroup ({
+          name: 'mainFrameGroup',
+          scrollEnabled: true,
+          rect: {
+               x: 0,
+               y: headerH + navH,
+               w: 'auto',
+               h: 'auto'
+          },
+          index: 0,
+          frames: frames
+      }, function(ret, err){
+          if( ret ){
+            console.log(JSON.stringify( ret ))
+            fnSetNavMenuSelected(ret.index)
+          }else{
+               alert( JSON.stringify( err ) );
           }
       });
     }
 
 
+    function fnSetNavMenuSelected(index_) {
+       for (var i = 0; i < menus.length; i++) {
+         if(index_ == i){
+            $api.addCls(menus[i], 'selected');
+         }else {
+           $api.removeCls(menus[i], 'selected');
+         }
+       }
+    }
+
     function fnGetCityFromLocation(location_) {
-    //根据经纬度查找地址信息
+      var location_ = JSON.stringify(location_)
+    // 根据经纬度查找地址信息/
       bMap.getNameFromCoords({
           lon: location_.lon,
           lat: location_.lat
           }, function(ret, err) {
               if (ret.status) {
-                  //alert(JSON.stringify(ret));
+                  // alert(JSON.stringify(ret));
                   fnCheckCityChange(ret.city);
+              }else{
+                fnCheckCityChange('北京市');
               }
           });
       }
@@ -200,11 +267,6 @@
         }
       }
 
-
-
-    function initLocation() {
-
-    }
 
     function fnOpenPersonCenterWin(){
       api.openWin({//打开新的页面
